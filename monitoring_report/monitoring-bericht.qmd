@@ -1,0 +1,124 @@
+---
+title: "Aamsveen/Hündfelder Moor - Monitoring Report 2025"
+format: html
+---
+
+```{r}
+#| echo: false
+#| label: setup
+#| message: false
+#| warning: false
+source("init.R")
+source("scripts/load_data.R")
+
+source("scripts/aggregate_statistics.r")
+```
+
+
+
+## Zweck des Monitoringberichts
+
+Im Zuge des LIFE Projekt LifeCrossBorderBog wird das Gebiet Aamsveen/Hündfelder Moor im Kreis Borken an der Deutsch-Niederländischen Grenze renaturiert. Verschiedene Baumaßnahmen sollen Bedingungen schaffen, die langfristig das eigenständige Wachstum von Torfmoosen ermöglichen. Wichtigstes Ziel der Baumaßnahmen ist es den Grundwasserstand im Gebiet dauerhaft anzuheben. Dazu wurden im Projekt Soll-Grundwasserstände definiert die durch die Baumaßnahmen erreicht werden sollen. Um den Erfolg der Maßnahmen im Projekt LifeCrossBorderBog zu evaluieren, wurde deshalb schon vor Beginn der ersten Bauphase Messstellen eingerichtet die den Grundwasserstand im Gebiet ermitteln. Im folgenden Monitoringbericht wird 1. das eingesetze Dauerbeobachtungssystem beschrieben und 2. der Ist-Zustand des Grundwasserstands vor der Renaturierungsmaßnahme evaluiert.
+
+
+
+
+## Technische Grundlagen
+
+Die Grundwasser-Messtellen die von der Biologischen Station Zwillbrock betrieben werden bestehen aus einem 2-Zoll Rohr, welches im Moorkörper verankert wurde und mit einem Tekelek TEK766 ([Produktseite des Herstellers](https://rochestersensorseurope.com/product/liquid-level-sensor-lorawan-tank-level-gauge-tek-766-lora-ultrasonic-us/)) Ultaschall Sensor ausgestattet ist (siehe @fig-tekelek).
+Alle 6 Stunden wird der Abstand vom Sensorkopf zur Wasseroberfläche per Ultraschall gemessen und zusammen mit der Qualität der Messung via LoRa (Long Range Wide Area) an ein Gateway übermittelt, welches die Messung dann in einen Online Cloud Dienst sendet. 
+
+```{r}
+#| label: fig-tekelek
+#| echo: false
+#| fig-cap: "Grundwasser-Messstelle mit Tekelek TEK766 Sensor"
+knitr::include_graphics("monitoring_report/messstelle.jpg")
+```
+
+
+
+
+
+
+
+
+
+## Beschreibung der Grundwasser Dauerbeobachtung
+
+Im Projektgebiet sind insgesamt 69 Grundwasser-Messstellen eingerichtet. 51 davon im Hündfelder Moor die von der Biologischen Station Zwillbrock betrieben werden. 18 weitere werden von der Bezirksverwaltung Overijssel betrieben wovon 14 Messstellen auf Niederländischer Seite im Aamsveen und 4 auf Deutscher Seite eingerichtet sind.
+
+```{r}
+
+mapview::mapview(gwsHeader, zcol = "Betreiber", legend.title = "Messstellen")
+
+```
+
+
+
+
+
+## Grundwasserstand vor der Renaturierunsmaßnahme
+
+
+
+```{r}
+gwsStats |> mapview(zcol = "GWSmedian")
+
+```
+
+
+
+## Ist-GWS im Vergleich zu Soll-GWS
+
+
+```{r}
+gwsStats |> mapview(zcol = "GWS_Differenz")
+```
+
+
+### Ausgewählte Beispiele
+
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+sensorid = "244E7B0000004775"
+gws |> filter(ID == sensorid) |> filter(month(Datum) %in% c(5,6,7)) |> 
+  ggplot(aes(x = Datum, y = GWS_rel))+
+  geom_point(size = 1, color = "royalblue")+
+  geom_line(color = "royalblue")+
+  scale_x_date(position = "top", name = NULL)+
+  ylab("Grundwasserstand [cm]")+
+  geom_hline(yintercept = 0)+
+  geom_hline(data = gwsHeader |> filter(ID == sensorid), aes(yintercept = GWS_Soll_rel), color = "firebrick2", show.legend = TRUE)+
+  theme(text = element_text(color = "black"), line = element_line(color = "black"), 
+        panel.background = element_blank(), 
+        axis.text = element_text(color = "black"), axis.ticks = element_blank(),
+        panel.grid = element_blank(), panel.grid.major.y = element_line(color = "grey60"))
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+sensorid = "244E7B0000003F54"
+gws |> filter(ID == sensorid) |> filter(month(Datum) %in% c(5,6,7)) |> 
+  ggplot(aes(x = Datum, y = GWS_rel))+
+  geom_point(size = 1, color = "royalblue")+
+  geom_line(color = "royalblue")+
+  scale_x_date(position = "top", name = NULL)+
+  ylab("Grundwasserstand [cm]")+
+  geom_hline(yintercept = 0)+
+  geom_hline(data = gwsHeader |> filter(ID == sensorid), aes(yintercept = GWS_Soll_rel), color = "firebrick2", show.legend = TRUE)+
+  theme(text = element_text(color = "black"), line = element_line(color = "black"), 
+        panel.background = element_blank(), 
+        axis.text = element_text(color = "black"), axis.ticks = element_blank(),
+        panel.grid = element_blank(), panel.grid.major.y = element_line(color = "grey60"))
+```
+
+
+
+
